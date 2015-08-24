@@ -85,6 +85,10 @@ public partial class Driver : MonoBehaviour {
 				info.weight -= Mathf.Max(0f, sumWeight + info.weight - 1f);
 				sumDir      += info.dir * info.weight;
 				sumWeight   += info.weight;
+
+				if (sumWeight > 0.99f) {
+					break;
+				}
 			}
 
 			return sumDir.normalized;
@@ -99,7 +103,7 @@ public partial class Driver : MonoBehaviour {
 			base.Initialize (driver);
 		}
 		public override DirectionInfo CurTargetDir() {
-			return calcTargetDir (); // todo: i want to use cache scheme.
+			return CalcCacheManager.Instance.GetValue<DirectionInfo> (this, 0.5f, calcTargetDir);
 		}
 
 		public DirectionInfo calcTargetDir() {
