@@ -40,7 +40,7 @@ public partial class Driver : MonoBehaviour {
 		while (true) {
 			Vector3 curDir = car.Dir;
 			Vector3 tgtDir = curTargetDir ();
-			float   tgtAng = toAngFrom (curDir, tgtDir);
+			float   tgtAng = Util.ToAngFrom (curDir, tgtDir);
 			float   addAng = tgtAng - car.Ang;
 
 			if (Mathf.Abs (addAng) > MinHandleRot) {
@@ -50,15 +50,6 @@ public partial class Driver : MonoBehaviour {
 			car.ForceGasPedal (Time.deltaTime);
 			yield return null;
 		}
-	}
-
-	private float toAngFrom(Vector3 curDir, Vector3 tgtDir) {
-		Quaternion aq = Quaternion.FromToRotation (curDir, tgtDir);
-		return toSignedAng(aq.eulerAngles.y);
-	}
-
-	private static float toSignedAng(float ang) {
-		return ang > 180f ? ang - 360f : ang;
 	}
 
 	private Vector3 curTargetDir() {
@@ -148,6 +139,19 @@ public partial class Driver : MonoBehaviour {
 		public override DirectionInfo CurTargetDir() {
 			return new DirectionInfo (driver.car.Dir, 1f);
 		}
+	}
+
+	public class Util {
+
+		public static float ToAngFrom(Vector3 curDir, Vector3 tgtDir) {
+			Quaternion aq = Quaternion.FromToRotation (curDir, tgtDir);
+			return toSignedAng(aq.eulerAngles.y);
+		}
+
+		private static float toSignedAng(float ang) {
+			return ang > 180f ? ang - 360f : ang;
+		}
+
 	}
 
 }
