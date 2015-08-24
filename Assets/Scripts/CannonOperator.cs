@@ -11,11 +11,12 @@ public class CannonOperator : MonoBehaviour {
 	private List<Car> targetList;
 	private Car       curTarget;
 	private float     curRotForce;
+	private float     curAddAngToTgt;
 
 	private Transform cannonTrans;
-	private bool      isTargettting;
 
 	private const float PredictiveSeconds = 0.5f;
+	private const float FireRange         = 10f;
 
 	private void Start() {
 		Initialize ();
@@ -26,7 +27,6 @@ public class CannonOperator : MonoBehaviour {
 
 		cannonTrans   = cannon.transform;
 		targetList    = GameObject.FindObjectsOfType<Car> ().Where (c => c != myCar).ToList ();
-		isTargettting = true;
 
 		StartCoroutine (rotateCannon ());
 
@@ -45,33 +45,34 @@ public class CannonOperator : MonoBehaviour {
 	}
 
 	private IEnumerator procRotate() {
-		while (!isTargettting) {
-
-			Vector3 tgtPos = curTarget.Pos;
-			Vector3 tgtDir = curTarget.Dir;
-			float   tgtSpd = curTarget.engine.Speed;
-			Vector3 prdPos = tgtPos + tgtDir * tgtSpd * PredictiveSeconds;
-
-			Vector3 curPos = cannonTrans.position;
-			Vector3 curDir = cannonTrans.forward;
-			Vector3 relDir = (tgtPos - curPos).normalized;
-			yield return null;
-
-			curRotForce = Driver.Util.ToAngFrom (curDir, relDir);
+		while (curTarget == null) {
 			yield return null;
 		}
 
-		while (!isTargettting) {
+		while (true) {
+			curAddAngToTgt = calcAngTo (curTarget);
+			curRotForce    = curAddAngToTgt;
+
 			yield return null;
 		}
+	}
 
-		yield return null;
-		StartCoroutine (procRotate ());
+	private float calcAngTo(Car car) {
+		Vector3 tgtPos = car.Pos;
+		Vector3 tgtDir = car.Dir;
+		float   tgtSpd = car.engine.Speed;
+		Vector3 prdPos = tgtPos + tgtDir * tgtSpd * PredictiveSeconds;
+
+		Vector3 curPos = cannonTrans.position;
+		Vector3 curDir = cannonTrans.forward;
+		Vector3 relDir = (tgtPos - curPos).normalized;
+
+		return Driver.Util.ToAngFrom (curDir, relDir);
 	}
 
 	private IEnumerator procFire() {
 
-		while (!cannon.IsFireable) {
+		while (!(cannon.IsFireable && Mathf.Abs (curAddAngToTgt) < FireRange)) {
 			yield return null;
 		}
 
@@ -83,24 +84,13 @@ public class CannonOperator : MonoBehaviour {
 	}
 
 	private IEnumerator procTargetting() {
-		while (isTargettting) {
-			curTarget     = targetList [(int)(Random.value * targetList.Count)];
-			isTargettting = false;
-
-			yield return null;
-		}
-
-		while (!isTargettting) {
-			yield return null;
-		}
-
 		yield return null;
-		StartCoroutine (procTargetting ());
-	}
 
-	private void startTargetting() {
-		isTargettting = true;
-	}
+		while (true) {
+			curTarget = targetList.WhichMin (t => Mathf.Abs( calcAngTo (t)));
 
+			yield return new WaitForSeconds (1f);
+		}
+	}
 
 }

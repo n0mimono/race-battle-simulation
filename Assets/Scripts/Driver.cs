@@ -149,7 +149,16 @@ public partial class Driver : MonoBehaviour {
 		}
 
 		private static float toSignedAng(float ang) {
-			return ang > 180f ? ang - 360f : ang;
+			float sang = ang;
+			while (sang > 180f) {
+				sang -= 360f;
+			}
+
+			while (sang < -180f) {
+				sang += 360f;
+			}
+
+			return sang;
 		}
 
 	}
