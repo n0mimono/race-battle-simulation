@@ -51,7 +51,7 @@ public class CannonOperator : MonoBehaviour {
 
 		while (true) {
 			curAddAngToTgt = calcAngTo (curTarget);
-			curRotForce    = curAddAngToTgt;
+			curRotForce    = Mathf.Sign(curAddAngToTgt) * rotForce;
 
 			yield return null;
 		}
