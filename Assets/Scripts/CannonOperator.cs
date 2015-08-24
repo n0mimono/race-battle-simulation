@@ -65,7 +65,7 @@ public class CannonOperator : MonoBehaviour {
 
 		Vector3 curPos = cannonTrans.position;
 		Vector3 curDir = cannonTrans.forward;
-		Vector3 relDir = (tgtPos - curPos).normalized;
+		Vector3 relDir = (prdPos - curPos).normalized;
 
 		return Driver.Util.ToAngFrom (curDir, relDir);
 	}
