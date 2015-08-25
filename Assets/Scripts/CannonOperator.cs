@@ -15,7 +15,7 @@ public class CannonOperator : MonoBehaviour {
 
 	private Transform cannonTrans;
 
-	private const float PredictiveSeconds = 0.5f;
+	private const float PredictiveSeconds = 1f;
 	private const float FireRange         = 10f;
 
 	private void Start() {
@@ -25,7 +25,7 @@ public class CannonOperator : MonoBehaviour {
 	public void Initialize() {
 		cannon.Initialize ();
 
-		cannonTrans   = cannon.transform;
+		cannonTrans   = cannon.platform;
 		targetList    = GameObject.FindObjectsOfType<Car> ().Where (c => c != myCar).ToList ();
 
 		StartCoroutine (rotateCannon ());
@@ -48,10 +48,11 @@ public class CannonOperator : MonoBehaviour {
 		while (curTarget == null) {
 			yield return null;
 		}
+		yield return null;
 
 		while (true) {
 			curAddAngToTgt = calcAngTo (curTarget);
-			curRotForce    = Mathf.Sign(curAddAngToTgt) * rotForce;
+			curRotForce    = Mathf.Abs(curAddAngToTgt) < 1f ? 0f : Mathf.Sign(curAddAngToTgt) * rotForce;
 
 			yield return null;
 		}
@@ -70,9 +71,13 @@ public class CannonOperator : MonoBehaviour {
 		return Driver.Util.ToAngFrom (curDir, relDir);
 	}
 
+	private bool isHittable() {
+		return cannon.IsFireable && Mathf.Abs (curAddAngToTgt) < FireRange;
+	}
+
 	private IEnumerator procFire() {
 
-		while (!(cannon.IsFireable && Mathf.Abs (curAddAngToTgt) < FireRange)) {
+		while (!isHittable()) {
 			yield return null;
 		}
 
